@@ -22,7 +22,8 @@ export async function createGroup(groupData: CreateGroup) {
 
   // TODO
   [results] = await conn.query(
-    "INSERT INTO groups()"
+    "INSERT INTO groups(name, description, created_by) VALUES (?, ?, ?);"
+    [groupData.name, groupData.description, groupData.created_by]
   );
 
   await conn.end();
