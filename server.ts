@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRouter);
-app.use("/group", groupRouter);
+app.use("/groups", groupRouter);
 
 const httpServer = app.listen(PORT, (err) => {
   if (err) {
@@ -23,4 +23,3 @@ const httpServer = app.listen(PORT, (err) => {
 });
 
 export { httpServer };
-

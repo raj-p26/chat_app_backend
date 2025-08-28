@@ -1,13 +1,11 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth-middleware.ts";
+import * as groupController from "../controllers/group.ts"
 
 const groupRouter = Router();
 
-groupRouter.post("/", requireAuth, (_req, res) => {
-  res.status(201).send({
-    status: "success",
-    message: "Fake group created"
-  });
-});
+groupRouter.get("/", groupController.index);
+groupRouter.post("/", requireAuth, groupController.create);
+groupRouter.post("/:id/join", requireAuth, groupController.join);
 
 export { groupRouter };

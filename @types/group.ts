@@ -25,3 +25,16 @@ export type CreateGroup = {
   /** ID of the user who created this group. */
   created_by : string;
 };
+
+export type Member = {
+  /** UUID of the record */
+  id       : string;
+  /** UUID of the group member. */
+  member_id: string;
+  /** UUID of the group. */
+  group_id : string;
+  /** Date when the user joined that group. */
+  joined_at: Date;
+};
+
+export type JoinGroup = Pick<Member, "group_id" | "member_id">;
