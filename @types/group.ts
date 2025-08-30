@@ -10,8 +10,6 @@ export type Group = {
   description: string;
   /** ID of the user who created this group. */
   created_by : string;
-  /** Date when the group was created. */
-  created_at : Date;
 };
 
 /**
@@ -33,8 +31,6 @@ export type Member = {
   member_id: string;
   /** UUID of the group. */
   group_id : string;
-  /** Date when the user joined that group. */
-  joined_at: Date;
 };
 
 export type JoinGroup = Pick<Member, "group_id" | "member_id">;

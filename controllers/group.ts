@@ -7,7 +7,7 @@ export async function create(req: Request, res: Response) {
   let userID = req.headers['user-id'];
 
   if (!userID) {
-    res.status(401).send({
+    res.status(401).json({
       status: "failed",
       message: "You are unauthorized",
     });
@@ -15,7 +15,7 @@ export async function create(req: Request, res: Response) {
 
   userID = userID as string;
   
-  const err = await groupsHandler.createGroup({ created_by: userID, ...groupData });
+  const [group, err] = await groupsHandler.createGroup({ created_by: userID, ...groupData });
 
   if (err) {
     return res.status(500).send({
@@ -24,9 +24,10 @@ export async function create(req: Request, res: Response) {
     });
   }
 
-  res.status(201).send({
+  res.status(201).json({
     status : "success",
     message: "Group created successfully",
+    payload: { group }
   });
 }
 
@@ -46,7 +47,7 @@ export async function join(req: Request, res: Response) {
   const groupID = req.params['id'];
 
   if (!userID) {
-     res.status(401).send({
+     res.status(401).json({
       status : "failed",
       message: "You are unauthorized",
     });
@@ -65,8 +66,31 @@ export async function join(req: Request, res: Response) {
     });
   }
 
-  res.send({
+  res.json({
     status : "success",
     message: "Group joined successfully"
   });
+}
+
+export async function leave(req: Request, res: Response) {
+  const userID = req.headers['user-id'];
+  const groupID = req.params['id'];
+
+  if (!userID) {
+    return res.status(401).json({
+      status: "failed",
+      message: "You are unauthorized"
+    });
+  }
+
+  const err = await groupsHandler.leaveGroup(groupID, userID as string);
+
+  if (err) {
+    return res.status(500).json({
+      status: "failed",
+      message: err,
+    });
+  }
+
+  return res.status(204).send();
 }
