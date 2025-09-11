@@ -1,36 +1,35 @@
 CREATE TABLE `users` (
-  `id` varchar(36) NOT NULL PRIMARY KEY,
-  `username` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `inserted_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` VARCHAR(36) NOT NULL PRIMARY KEY,
+  `username` VARCHAR(255) NOT NULL UNIQUE,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `inserted_at` TIMESTAMP nOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `groups` (
-  `id` varchar(36) NOT NULL DEFAULT uuid(),
-  `name` varchar(255) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `created_by` varchar(36) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` VARCHAR(36) PRIMARY KEY NOT NULL,
+  `name` VARCHAR(255) NOT NULL UNIQUE,
+  `description` VARCHAR(255) DEFAULT NULL,
+  `created_by` VARCHAR(36) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  FOREIGN KEY(`created_by`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-ALTER TABLE `groups`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`),
-  ADD KEY `created_by` (`created_by`);
-
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email_index` (`email`);
-
-ALTER TABLE `groups`
-  ADD CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
-
-CREATE TABLE IF NOT EXISTS `group_members`(
-    `id` VARCHAR(36) NOT NULL PRIMARY KEY DEFAULT UUID(),
+CREATE TABLE IF NOT EXISTS `group_members` (
+    `id` VARCHAR(36) NOT NULL PRIMARY KEY,
     `member_id` VARCHAR(36) NOT NULL,
     `group_id` VARCHAR(36) NOT NULL,
-    `joined_at` DATE DEFAULT CURRENT_DATE(),
-    FOREIGN KEY(`member_id`) REFERENCES users(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(`group_id`) REFERENCES groups(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+    FOREIGN KEY(`member_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE messages (
+    `id` VARCHAR(36) NOT NULL PRIMARY KEY,
+    `content` TEXT NOT NULL,
+    `sender_id` VARCHAR(36) NOT NULL,
+    `group_id` VARCHAR(36) NOT NULL,
+    `inserted_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+    FOREIGN KEY(`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -9,19 +9,19 @@ export async function registerUser(req: Request, res: Response) {
 
   const [newUser, err] = await userHandler.registerUser(user);
 
-  if (err !== null) {
-    return res.status(500).send({
+  if (err !== null || newUser == null) {
+    return res.status(500).json({
       status: "failed",
-      message: err,
+      message: err || "Something went wrong",
     });
   }
 
-  const token = jwt.sign({ ...newUser! }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ ...newUser }, JWT_SECRET, { expiresIn: "7d" });
 
-  res.status(201).send({
-    status : "success",
+  res.status(201).json({
+    status: "success",
     message: "User created successfully",
-    payload: { token }
+    payload: { token, user },
   });
 }
 
@@ -30,19 +30,19 @@ export async function loginUser(req: Request, res: Response) {
 
   const [user, err] = await userHandler.loginUser(userData);
 
-  if (err !== null) {
+  if (err !== null || user === null) {
     const statusCode = err === "Invalid credentials" ? 401 : 500;
     return res.status(statusCode).send({
       status: "failed",
-      message: err,
+      message: err || "Something went wrong",
     });
   }
 
-  const token = jwt.sign({ ...user! }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ ...user }, JWT_SECRET, { expiresIn: "7d" });
 
-  res.send({
-    status : "success",
+  res.json({
+    status: "success",
     message: "Logged in successfully",
-    payload: { token }
+    payload: { token, user },
   });
 }

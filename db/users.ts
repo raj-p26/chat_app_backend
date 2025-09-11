@@ -5,23 +5,29 @@ import { v4 as uuidV4 } from "uuid";
 
 async function getConnection() {
   return await mysql.createConnection({
-    host    : "localhost",
-    port    : 3306,
-    user    : "root",
+    host: "localhost",
+    port: 3306,
+    user: "root",
     password: "",
-    database: "chat-app"
+    database: "chat-app",
   });
 }
 
-export async function registerUser(userData: RegisterUser): Promise<[User | null, string | null]> {
+export async function registerUser(
+  userData: RegisterUser
+): Promise<[User | null, string | null]> {
   const conn = await getConnection();
-  let [result] = await conn.query("SELECT * FROM users WHERE email=?;", [userData.email]);
+  let [result] = await conn.query("SELECT * FROM users WHERE email=?;", [
+    userData.email,
+  ]);
 
   if ((result as any).length > 0) {
     return [null, "User already exists"];
   }
 
-  [result] = await conn.query("SELECT * FROM users WHERE username=?;", [userData.username]);
+  [result] = await conn.query("SELECT * FROM users WHERE username=?;", [
+    userData.username,
+  ]);
 
   if ((result as any).length > 0) {
     return [null, "Username already exists"];
@@ -32,7 +38,7 @@ export async function registerUser(userData: RegisterUser): Promise<[User | null
 
   await conn.query(
     "INSERT INTO users(id, username, email, password) VALUES (?, ?, ?, ?);",
-    [id, userData.username, userData.email, hashedPassword],
+    [id, userData.username, userData.email, hashedPassword]
   );
 
   const user: User = {
@@ -46,15 +52,17 @@ export async function registerUser(userData: RegisterUser): Promise<[User | null
   return [user, null];
 }
 
-export async function loginUser(userData: LoginUser): Promise<[User | null, string | null]> {
+export async function loginUser(
+  userData: LoginUser
+): Promise<[User | null, string | null]> {
   const conn = await getConnection();
-  let [result] = await conn.query("SELECT * FROM users WHERE email=?;", [userData.email]);
+  let [result] = await conn.query("SELECT * FROM users WHERE email=?;", [
+    userData.email,
+  ]);
 
   if ((result as any).length === 0) {
     return [null, "Invalid credentials"];
   }
-
-  console.log(result[0]);
 
   const { id, username, email, password } = result[0];
 
@@ -69,3 +77,43 @@ export async function loginUser(userData: LoginUser): Promise<[User | null, stri
   return [user, null];
 }
 
+export async function getUserByID(
+  id: string
+): Promise<[User | null, string | null]> {
+  const conn = await getConnection();
+  try {
+    const [res] = await conn.query("SELECT * FROM users WHERE id=?;", [id]);
+
+    if (!res) {
+      return [null, "User not found"];
+    }
+
+    const user: User = {
+      id: res[0].id,
+      email: res[0].email,
+      username: res[0].username,
+    };
+
+    return [user, null];
+  } catch (e) {
+    return [null, e.message];
+  } finally {
+    await conn.end();
+  }
+}
+
+export async function getAllUsers(): Promise<User[]> {
+  const conn = await getConnection();
+  const [res] = await conn.query("SELECT * FROM users;");
+
+  if (!res) return [];
+
+  const users = (res as any[]).map<User>((e) => ({
+    id: e.id,
+    email: e.email,
+    username: e.username,
+  }));
+
+  await conn.end();
+  return users;
+}

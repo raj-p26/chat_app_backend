@@ -3,8 +3,8 @@ import * as groupsHandler from "../db/groups.ts";
 import type { JoinGroup } from "../@types/group.ts";
 
 export async function create(req: Request, res: Response) {
-  let groupData = req.body as { name: string; description: string; };
-  let userID = req.headers['user-id'];
+  let groupData = req.body as { name: string; description: string };
+  let userID = req.headers["user-id"];
 
   if (!userID) {
     res.status(401).send({
@@ -14,59 +14,100 @@ export async function create(req: Request, res: Response) {
   }
 
   userID = userID as string;
-  
-  const err = await groupsHandler.createGroup({ created_by: userID, ...groupData });
+
+  const [group, err] = await groupsHandler.createGroup({
+    created_by: userID,
+    ...groupData,
+  });
 
   if (err) {
     return res.status(500).send({
       status: "failed",
-      message: err
+      message: err,
     });
   }
 
   res.status(201).send({
-    status : "success",
+    status: "success",
     message: "Group created successfully",
+    payload: { group },
   });
 }
 
 export async function index(req: Request, res: Response) {
   const limit = +(req.query["limit"] as string) || 5;
-  
+
   const groups = await groupsHandler.listGroups(limit);
 
   res.send({
-    status : "success",
-    payload: { groups }
+    status: "success",
+    payload: { groups },
   });
 }
 
 export async function join(req: Request, res: Response) {
-  const userID = req.headers['user-id'];
-  const groupID = req.params['id'];
+  const userID = req.headers["user-id"];
+  const groupID = req.params["id"];
 
   if (!userID) {
-     res.status(401).send({
-      status : "failed",
+    res.status(401).send({
+      status: "failed",
       message: "You are unauthorized",
     });
   }
 
   const joinInfo: JoinGroup = {
     group_id: groupID,
-    member_id: userID as string
+    member_id: userID as string,
   };
 
   const err = await groupsHandler.joinGroup(joinInfo);
   if (err) {
     return res.status(500).send({
-      status : "failed",
-      message: err
+      status: "failed",
+      message: err,
     });
   }
 
   res.send({
-    status : "success",
-    message: "Group joined successfully"
+    status: "success",
+    message: "Group joined successfully",
+  });
+}
+
+export async function isMember(req: Request, res: Response) {
+  const groupID = req.params["id"];
+  const userID = req.headers["user-id"];
+  const isMember = await groupsHandler.isMemberOfGroup(
+    userID as string,
+    groupID
+  );
+
+  if (!isMember) {
+    return res.status(404).json({
+      status: "failed",
+      message: "User not in group",
+    });
+  }
+
+  res.json({ status: "success" });
+}
+
+export async function show(req: Request, res: Response) {
+  const groupID = req.params["id"] as string;
+
+  const group = await groupsHandler.getGroupByID(groupID);
+
+  if (group === null) {
+    return res.status(404).json({
+      status: "failed",
+      message: "Group not found",
+    });
+  }
+
+  res.json({
+    status: "success",
+    message: "Group found",
+    payload: { group },
   });
 }

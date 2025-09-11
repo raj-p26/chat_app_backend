@@ -3,15 +3,13 @@
  */
 export type Group = {
   /** ID of the group. UUID for IDs. */
-  id         : string;
+  id: string;
   /** Name of the group. */
-  name       : string;
+  name: string;
   /** Description of the group. */
   description: string;
   /** ID of the user who created this group. */
-  created_by : string;
-  /** Date when the group was created. */
-  created_at : Date;
+  created_by: string;
 };
 
 /**
@@ -19,20 +17,20 @@ export type Group = {
  */
 export type CreateGroup = {
   /** Name of the group. Max length 255. */
-  name       : string;
+  name: string;
   /** Description of the group. Max length 255. */
   description: string;
   /** ID of the user who created this group. */
-  created_by : string;
+  created_by: string;
 };
 
 export type Member = {
   /** UUID of the record */
-  id       : string;
+  id: string;
   /** UUID of the group member. */
   member_id: string;
   /** UUID of the group. */
-  group_id : string;
+  group_id: string;
   /** Date when the user joined that group. */
   joined_at: Date;
 };
